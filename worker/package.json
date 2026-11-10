@@ -1,0 +1,1 @@
+{"name":"stripe-webhook-worker","main":"src/index.js","dependencies":{"stripe":"^17.7.0"}}

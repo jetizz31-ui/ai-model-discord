@@ -1,0 +1,16 @@
+{
+  "name": "ai-model-discord",
+  "version": "1.0.0",
+  "description": "Discord bot for AI Model sports picks with Stripe VIP paywall",
+  "type": "module",
+  "scripts": {
+    "start": "node bot/index.js",
+    "setup": "node scripts/setup-server.js",
+    "post": "node scripts/post-card.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.21.0",
+    "dotenv": "^16.4.5",
+    "stripe": "^23.1.0"
+  }
+}

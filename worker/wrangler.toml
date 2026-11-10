@@ -1,0 +1,9 @@
+name = "ai-model-discord-webhook"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+VIP_ROLE_NAME = "VIP"
+DISCORD_SERVER_ID = "1569516990312218704"
+
+[env.production]
