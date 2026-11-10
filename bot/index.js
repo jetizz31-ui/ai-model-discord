@@ -35,6 +35,7 @@ client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
   if (interaction.commandName === 'join') {
+    await interaction.deferReply({ ephemeral: true });
     try {
       const session = await stripe.checkout.sessions.create({
         line_items: [
@@ -49,15 +50,13 @@ client.on('interactionCreate', async interaction => {
         cancel_url: 'https://discord.com',
       });
 
-      await interaction.reply({
+      await interaction.editReply({
         content: `🎯 **VIP Access**\n\nClick below to subscribe and get VIP plays:\n${session.url}\n\nAfter payment, your VIP role will be assigned automatically!`,
-        ephemeral: true
       });
     } catch (e) {
       console.error(e);
-      await interaction.reply({
+      await interaction.editReply({
         content: 'Error generating checkout link. Please try again later.',
-        ephemeral: true
       });
     }
   }
