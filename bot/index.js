@@ -1,6 +1,17 @@
 import 'dotenv/config';
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import Stripe from 'stripe';
+import http from 'http';
+
+// Create a simple HTTP server to keep Render health check happy
+const server = http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end('Bot is alive!');
+});
+const port = process.env.PORT || 10000;
+server.listen(port, () => {
+  console.log(`Health check server listening on port ${port}`);
+});
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const client = new Client({
@@ -61,5 +72,7 @@ client.on('interactionCreate', async interaction => {
     }
   }
 });
+
+client.on('error', console.error);
 
 client.login(process.env.DISCORD_TOKEN);
