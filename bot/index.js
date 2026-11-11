@@ -15,7 +15,7 @@ server.listen(port, () => {
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers]
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.DirectMessages]
 });
 
 const commands = [
@@ -37,9 +37,20 @@ async function registerCommands() {
   }
 }
 
+const welcomeQueue = new Map();
+
 client.once('ready', async () => {
   console.log(`Bot ready as ${client.user.tag}`);
   await registerCommands();
+
+  // Check for pending welcomes on startup
+  const now = Date.now();
+  for (const [userId, data] of welcomeQueue.entries()) {
+    if (now - data.joinedAt > 24 * 60 * 60 * 1000) {
+      await sendWelcomeDM(userId);
+      welcomeQueue.delete(userId);
+    }
+  }
 });
 
 client.on('interactionCreate', async interaction => {
@@ -71,6 +82,32 @@ client.on('interactionCreate', async interaction => {
       });
     }
   }
+});
+
+async function sendWelcomeDM(userId) {
+  try {
+    const user = await client.users.fetch(userId);
+    const embed = {
+      content: `🎯 **Welcome to AI Model!**\n\nYou've been here 24 hours — ready for full access?\n\nRun \`/join\` in the server to get VIP plays:\n• Daily NBA, NFL & College picks\n• 10-20 plays daily vs 5 free\n• VIP-only channels\n\n$10/month, cancel anytime.`,
+      embeds: []
+    };
+    await user.send(embed.content);
+    console.log(`Welcome DM sent to ${userId}`);
+  } catch (e) {
+    console.error(`Failed to send welcome DM to ${userId}:`, e.message);
+  }
+}
+
+client.on('guildMemberAdd', async member => {
+  welcomeQueue.set(member.id, { joinedAt: Date.now() });
+
+  // Schedule DM for 24 hours later
+  setTimeout(async () => {
+    if (welcomeQueue.has(member.id)) {
+      await sendWelcomeDM(member.id);
+      welcomeQueue.delete(member.id);
+    }
+  }, 24 * 60 * 60 * 1000);
 });
 
 client.on('error', console.error);
